@@ -16,10 +16,15 @@ const useStyles = makeStyles((theme) => ({
     }
   },
   ghLink: {
-    display: 'flex'
+    display: 'flex',
+    alignItems: 'center'
   },
   ghIcon: {
-    marginLeft: theme.spacing(2),
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(1)
+  },
+  smallFont: {
+    fontSize: '2rem'
   }
 }));
 
@@ -27,16 +32,16 @@ const Nav = () => {
   const classes = useStyles();
 
   return (
-    <AppBar position="sticky">
+    <AppBar position="sticky" color="transparent" elevation={0}>
       <ToolBar className={classes.toolBar}>
         <div className={classes.inlineDiv}>
-          <WizardIcon fontSize="large" />
-          <Typography variant="h5">
-            App Merlin
-            </Typography>
+          <WizardIcon fontSize="large" color="secondary" />
+          <Typography variant="h3" color="secondary" className={classes.smallFont}>
+            Excuse Wizard
+          </Typography>
         </div>
-        <Link className={classes.ghLink} href="https://github.com/cywang117" color="inherit" target="_blank" rel="noopener">
-          More Apps on <GitHubIcon className={classes.ghIcon} />
+        <Link className={classes.ghLink} href="https://github.com/cywang117" color="secondary" target="_blank" rel="noopener">
+          More on <GitHubIcon className={classes.ghIcon}/> !
         </Link>
       </ToolBar>
     </AppBar>

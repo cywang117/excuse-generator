@@ -15,44 +15,44 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-let sampleIdeas = [
-  'A dating app for dog owners',
-  'A calendar app that lists fake events so you look busy',
-  'An app that adds an Apple Watch to a photo of the user',
-  'An app that texts your friends "Where r u?" every 30 minutes',
-  'An app that allows users to donate pizzas to other users',
-  'An app that counts the number of curse words in a movie',
-  'A language learning app for learning bad words',
-  'A pen pal app that pairs you with someone who doesn\'t speak your language'
+let sampleExcuses = [
+  'I\'ve got to water my garbanzo beans',
+  'I have an appointment to get my ringworm checked',
+  'I\'ve got a conference call',
+  'My cat is having an abortion',
+  'I\'m suffering from horrible diarrhea',
+  'I have to return some video tapes',
+  'My mom said no',
+  'My water broke'
 ];
-const generateIdea = () => {
-  return sampleIdeas[Math.floor(Math.random() * sampleIdeas.length)];
+const generateExcuse = () => {
+  return sampleExcuses[Math.floor(Math.random() * sampleExcuses.length)];
 };
 
 const Generator = () => {
   const classes = useStyles();
 
-  let [idea, setIdea] = useState(generateIdea());
+  let [excuse, setExcuse] = useState(generateExcuse());
 
   const handleClick = () => {
-    setIdea(generateIdea());
+    setExcuse(generateExcuse());
   };
 
   return (
     <Container className={classes.root}>
       <Box pb={10}>
         <Typography variant="h3" align="center" color="secondary" gutterBottom={true}>
-          Your next million dollar idea:
+          Your excuse:
         </Typography>
         <Divider />
       </Box>
       <Box pb={5} px={10} height="175px">
         <Typography variant="h4" align="center">
-          {idea}
+          {excuse}
         </Typography>
       </Box>
 
-      <Button variant="contained" color="secondary" onClick={handleClick} className={classes.label}>Another idea, squire!</Button>
+      <Button variant="contained" color="secondary" onClick={handleClick} className={classes.label}>Generate Another Excuse</Button>
     </Container>
   );
 };

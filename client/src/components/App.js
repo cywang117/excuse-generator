@@ -4,6 +4,13 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import Nav from './Nav';
 import Generator from './Generator';
 
+const cursiveFontObj = {
+  fontFamily: [
+    'Permanent Marker',
+    'cursive'
+  ].join(',')
+}
+
 const theme = createMuiTheme({
   palette: {
     primary: {
@@ -11,6 +18,11 @@ const theme = createMuiTheme({
       main: '#0277bd',
       dark: '#004c8c'
     }
+  },
+  typography: {
+    h1: cursiveFontObj,
+    h2: cursiveFontObj,
+    h3: cursiveFontObj
   }
 });
 
