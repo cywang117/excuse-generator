@@ -6,6 +6,8 @@ const router = express.Router();
 const { listAll } = require('./db/index');
 const { excuseMarkovChain } = require('./utils/markovChain');
 
+excuseMarkovChain.processData().then(data => console.log('preprocessed: ', data, data.length));
+
 console.log('Graph nodes: ', excuseMarkovChain.nodes);
 console.log('Graph edge list: ', excuseMarkovChain.edgeList);
 console.log('Graph strToIdxMap: ', excuseMarkovChain.strToIdxMap);
