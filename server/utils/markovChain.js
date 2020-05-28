@@ -1,23 +1,23 @@
-const { sampleCorpus, badSampleCorpus } = require('./sampleData');
 const axios = require('axios');
 const nlp = require('compromise');
+
+const { sampleCorpus, badSampleCorpus } = require('./sampleData');
 const alphaWordDict = require('./words_dictionary.json');
+const { shallowEquals } = require('./shallowEquals');
 
 /**
  * Implementation of the Markov Chain Monte Carlo (MCMC) algorithm using directed graph & generate/processData methods.
  * Must be instantiated with an unprocessed data corpus as an Array of non-zero length strings.
  * Used for generating pseudo-random, semi-realistic phrases based off the content of the input data corpus.
  *
- * Directed graph: nodes as a list of indices, a mapping of words to those indices, and a weighted edge list,
- * formatted as follows:
- * edgeList:
+ * Directed graph: a weighted edge list, formatted as follows:
  * {
- *    idxOfString1: [[idxOfString2, 0.4], [idxOfString3, 0.7]],
- *    idxOfString2: [[idxOfString3, 0.2]],
+ *    string1: [[string2, 0.4], [string3, 0.7]],
+ *    string2: [[string3, 0.2]],
  *    ...etc.
  * }
  * Note that because the graph is directed, string1 may connect to string2, but string2 may not connect to string1
- * removeNode or removeEdge functionality has been ignored, as the graph doesn't require it in the context of MCMC.
+ * removeNode, addNode, & removeEdge functionality has been ignored, as the graph doesn't require it in the context of MCMC.
  *
  * A graph implemented with an edge list is preferred, as an adjacency matrix will most likely (depending on data corpus)
  * be too sparse to be efficient, and an adjacency list glosses over the most important aspect of MCMC text generation: edge weights.
@@ -26,7 +26,8 @@ class MarkovChain {
   constructor(data) {
     // Retain unprocessed & preprocessed for comparison with newly added data in
     // sprint stretch goal: user-posted excuses which recalibrate the Markov chain
-    this.unprocessedData = data; // Array of Strings
+    this.unprocessedData = [...data]; // Array of Strings
+    this.prevUnprocessedData = [...data];
     this.preprocessedData = null; // Array of compromise (nlp library) docs
 
     // For preprocessing
@@ -35,14 +36,14 @@ class MarkovChain {
     this.allowedPunctCount = {'"': 4, '\'': 4, '%': 1, '?': 1, '-': 2, ',': 2};
 
     // Processed data goes directly into a directed graph
-    this.nodes = [];
-    this.edgeList = {};
-    this.strToIdxMap = new Map();
+    this.edgeList = new Map();
+    this.phraseBeginnings = new Set();
+    this.prevK = null;
     if (!this.unprocessedData) {
       throw new Error('Markov Chain must be instantiated with an array of strings');
       return;
     }
-    this.processData();
+    //this.processData();
   }
 
   /**
@@ -50,14 +51,58 @@ class MarkovChain {
   * where each node corresponds to a word, and each edge is a link between a word and the one that comes after it.
   * The weighting is calculated as a word distribution percentage after processing.
   * @param {Integer} k: number of previous words to track in edgeList (influencing how many words are in a node unit)
+  * NOTE: It is recommended, for short phrases and small datasets, to keep k = 1, otherwise
+  * generated sentences will most likely be exactly the same as those in the data corpus.
   */
   async processData(k = 1) {
-    this.preprocessedData = await this._preprocessData();
-    if (!this.preprocessedData.length) {
-      return this.preprocessedData; // []
+    let isDataDifferent = !shallowEquals(this.unprocessedData, this.prevUnprocessedData);
+
+    // A preprocess call should happen whenever data changes or doesn't exist
+    if (!this.preprocessedData || isDataDifferent) {
+      this.preprocessedData = await this._preprocessData();
+      this.prevUnprocessedData = [...this.unprocessedData];
     }
-    // TODO
-    return 'TODO';
+
+    // All data passed in is invalid after preprocessing. Graph should be emptied
+    if (!this.preprocessedData.length) {
+      this.edgeList = new Map();
+      this.phraseBeginnings = new Set();
+      return;
+    }
+
+    // Reconstruct directed graph if k is different.
+    // If k is the same but data is different, we should still reconstruct
+    // the directed graph due to possible changes in edge weighting (TODO: more elegant solution rather than reconstruction whole graph)
+    if (this.prevK !== k || isDataDifferent) {
+      this.prevK = k;
+      this.edgeList = new Map();
+      this.phraseBeginnings = new Set();
+    }
+
+    let edgeMap = new Map();
+    // Add preprocessed data to directed graph based on k param
+    this.preprocessedData.forEach(strArr => {
+      let kWindow = [], kWindowStr;
+      for (let i = 0; i <= strArr.length - k; i++) {
+        // If first loop, add first k words as a beginning phrase
+        if (i === 0) {
+          kWindow = strArr.slice(i, k);
+          this.phraseBeginnings.add(kWindow.join(' '));
+        } else {
+          kWindow.push(strArr[i+k-1]);
+          kWindow.shift();
+        }
+        kWindowStr = kWindow.join(' ');
+        if (!edgeMap.get(kWindowStr)) {
+          edgeMap.set(kWindowStr, []);
+        }
+        // Set as null for end of phrase
+        edgeMap.get(kWindowStr).push(strArr[i+k] || null);
+      }
+    });
+
+    this._calculateEdgeWeights(edgeMap);
+    return;
   }
 
   /**
@@ -66,6 +111,31 @@ class MarkovChain {
    */
   generate() {
     return 'This function will generate a random excuse later'
+  }
+
+  /**
+   * Given a map of keys length k to arrays of possible next words,
+   * calculate the probability of selecting any next word and
+   * add as weights to this.edgeList.
+   * @param {Object{String:Array}} edgeMap
+   */
+  _calculateEdgeWeights(edgeMap) {
+    edgeMap.forEach((valArr, key) => {
+      let distribution = {};
+      let denominator = 0;
+      valArr.forEach(val => {
+        distribution[val] ? distribution[val]++ : distribution[val] = 1;
+        denominator++;
+      });
+      for (let key in distribution) {
+        distribution[key] = parseFloat((distribution[key] / denominator).toFixed(4));
+      }
+      this.edgeList.set(key, {
+        nextWords: [...valArr],
+        total: denominator,
+        distribution
+      });
+    });
   }
 
   /**
@@ -164,8 +234,10 @@ class MarkovChain {
    * For each word in strArr, if it has punctuation in it, split punctuation into a separate array entry
    * Contractions have been removed in previous _expandAllContractions call,
    * so only need to account for <.>, <?>, <%>, <$>, <,>, <">, and <'> (from possessive form)
+   *
+   * Note that <'s> is paired together:
    * Purpose: for increased accuracy in Markov Chain generation later on
-   * (in that phrases containing there's, here's, and grandma's, for example will share the same pool)
+   * (in that phrases containing there's, here's, and grandma's, for example will share the same pool since they end in <'s>)
    * @param {Array[Array[String]]} arrOfStrArr
    */
   _addSpacesBetweenPunctuation(arrOfStrArr) {
@@ -174,24 +246,41 @@ class MarkovChain {
       for (let word of strArr) {
         // If has punctuation, separate
         if (word.search(/^[a-zA-Z]+$/) === -1) {
-          let punctMatches = word.match(/[\.\?\%\$\,\"\']+/g);
-          let current = '';
-          for (let letter of word) {
-            if (punctMatches.length && punctMatches[0] === letter) {
-              current && punctWithSpacesArr.push(current);
-              current = '';
-              punctWithSpacesArr.push(letter) && punctMatches.shift();
-            } else {
-              current += letter;
-            }
-          }
-          current && punctWithSpacesArr.push(current);
+          punctWithSpacesArr.push(...this._separatePunctuatedUnit(word));
         } else {
           punctWithSpacesArr.push(word);
         }
       }
       return punctWithSpacesArr;
     });
+  }
+
+  /**
+   * Given a word with some form of punctuation in the middle, separate according to
+   * rules listed in _addSpacesBetweenPunctuation method.
+   * @param {String} word
+   * @returns {Array}
+   */
+  _separatePunctuatedUnit(word) {
+    let wordWithSpacedPunctArr = [];
+    let punctMatches = word.match(/[\.\?\%\$\,\"\']+/g);
+    let current = '';
+    for (let letter of word) {
+      if (punctMatches.length && punctMatches[0] === letter) {
+        current && wordWithSpacedPunctArr.push(current);
+        current = '';
+        let curLetter = punctMatches.shift();
+        if (curLetter === '\'') {
+          current += curLetter;
+        } else {
+          wordWithSpacedPunctArr.push(curLetter);
+        }
+      } else {
+        current += letter;
+      }
+    }
+    current && wordWithSpacedPunctArr.push(current);
+    return wordWithSpacedPunctArr;
   }
 
   /**
@@ -204,33 +293,6 @@ class MarkovChain {
       doc.contractions().expand();
       return doc.text().split(' ');
     });
-  }
-
-  /**
-   * @param {String} str: May be one or multiple space-separated words, depending on
-   */
-  _addNode(str) {
-    if (strToIdxMap.get(str) !== undefined) {
-      return;
-    }
-    strToIdxMap.set(str, strToIdxMap.size);
-    this.nodes.push(strToIdxMap[str]);
-  }
-
-  /**
-   * @param {String} strA
-   * @param {String} strB: strA ---> strB, strB !--> strA
-   * @param {Float} weight
-   */
-  _addEdge(strA, strB, weight) {
-    if (strToIdxMap.get(strA) === undefined || strToIdxMap.get(strB) === undefined) {
-      addNode(strA);
-      addNode(strB);
-    }
-    if (!this.edgeList[strToIdxMap]) {
-      this.edgeList[strToIdxMap] = [];
-    }
-    this.edgeList[strToIdxMap.get(strA)].push([strToIdxMap.get(strB), weight]);
   }
 }
 
