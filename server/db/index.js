@@ -15,12 +15,19 @@ exports.listTopN = async (n = 10) => {
   return results;
 };
 
-exports.incrementLikes = async ({ _id }) => {
-  Excuse.updateOne(
-    { _id },
+exports.incrementLikes = async ({ _id, excuse }) => {
+  return Excuse.updateOne(
+    { excuse },
     { $inc: { likes: 1 }},
     { upsert: true }
   )
+    .then(res => {
+      if (res.upserted) {
+        return res.upserted[0]._id;
+      } else {
+        return null;
+      }
+    })
     .catch(err => { throw err; });
 };
 

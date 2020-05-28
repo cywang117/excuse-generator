@@ -45,13 +45,17 @@ router.get('/likes/session', (req, res) => {
 });
 
 router.post('/like', async (req, res) => {
-  let { _id } = req.body;
+  let { _id, excuse } = req.body;
   if (!req.session.likes) {
     req.session.likes = {};
   }
   if (!req.session.likes[_id]) {
-    req.session.likes[_id] = true;
-    await incrementLikes({ _id  });
+    let newIdIfNotExists = await incrementLikes({ excuse });
+    if (newIdIfNotExists) {
+      req.session.likes[newIdIfNotExists] = true;
+    } else {
+      req.session.likes[_id] = true;
+    }
     res.status(201).json({ message: 'Post successfully liked' });
   } else {
     res.status(400).json({ error: 'Post is already liked' });
