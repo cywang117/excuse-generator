@@ -1,50 +1,92 @@
-import React from 'react';
-import { AppBar, ToolBar, Link, Typography } from '@material-ui/core';
+import React, { useState } from 'react';
+import { AppBar, ToolBar, Drawer, Hidden, Typography, IconButton } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import { Menu as MenuIcon } from '@material-ui/icons';
 import WizardIcon from './WizardIcon';
-import { GitHub as GitHubIcon } from '@material-ui/icons';
+import LikedExcuseList from './LikedExcuseList';
 
 const useStyles = makeStyles((theme) => ({
-  toolBar: {
+  flexToolbar: {
     display: 'flex',
     justifyContent: 'space-between'
   },
+  drawer: {
+    background: '#FAFAFA'
+  },
   inlineDiv: {
     display: 'flex',
+    paddingRight: theme.spacing(10),
     '& svg': {
       marginRight: theme.spacing(2)
     }
   },
-  ghLink: {
-    display: 'flex',
-    alignItems: 'center'
-  },
-  ghIcon: {
-    marginLeft: theme.spacing(1),
-    marginRight: theme.spacing(1)
-  },
   smallFont: {
     fontSize: '2rem'
+  },
+  menuButton: {
+    marginRight: theme.spacing(2),
+    [theme.breakpoints.up('md')]: {
+      display: 'none'
+    }
   }
 }));
 
 const Nav = () => {
   const classes = useStyles();
+  let [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  const toggleDrawer = () => {
+    setIsDrawerOpen(!isDrawerOpen);
+  };
 
   return (
-    <AppBar position="sticky" color="transparent" elevation={0}>
-      <ToolBar className={classes.toolBar}>
-        <div className={classes.inlineDiv}>
-          <WizardIcon fontSize="large" color="secondary" />
-          <Typography variant="h3" color="secondary" className={classes.smallFont}>
-            Excuse Wizard
+    <React.Fragment>
+      <AppBar position="sticky" color="transparent" elevation={0}>
+        <ToolBar className={classes.flexToolbar}>
+          <div className={classes.inlineDiv}>
+            <WizardIcon fontSize="large" color="secondary" />
+            <Typography variant="h3" color="secondary" className={classes.smallFont} noWrap>
+              Excuse Wizard
           </Typography>
-        </div>
-        <Link className={classes.ghLink} href="https://github.com/cywang117" color="secondary" target="_blank" rel="noopener">
-          More on <GitHubIcon className={classes.ghIcon}/> !
-        </Link>
-      </ToolBar>
-    </AppBar>
+          </div>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            onClick={toggleDrawer}
+            className={classes.menuButton}
+          >
+            <MenuIcon />
+          </IconButton>
+        </ToolBar>
+      </AppBar>
+      <nav>
+        <Hidden mdUp implementation="css">
+          <Drawer
+            anchor="right"
+            open={isDrawerOpen}
+            onClose={toggleDrawer}
+            classes={{
+              paper: classes.drawer
+            }}
+          >
+            <LikedExcuseList />
+          </Drawer>
+        </Hidden>
+        <Hidden smDown implementation="css">
+          <Drawer
+            anchor="right"
+            variant="permanent"
+            classes={{
+              paper: classes.drawer
+            }}
+            open
+          >
+            <LikedExcuseList />
+          </Drawer>
+        </Hidden>
+      </nav>
+    </React.Fragment>
+
   );
 };
 
