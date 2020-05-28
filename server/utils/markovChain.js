@@ -43,7 +43,6 @@ class MarkovChain {
       throw new Error('Markov Chain must be instantiated with an array of strings');
       return;
     }
-    //this.processData();
   }
 
   /**
@@ -56,6 +55,11 @@ class MarkovChain {
   */
   async processData(k = 1) {
     let isDataDifferent = !shallowEquals(this.unprocessedData, this.prevUnprocessedData);
+
+    // Same exact data & k as last processData call
+    if (!isDataDifferent && this.prevK === k) {
+      return;
+    }
 
     // A preprocess call should happen whenever data changes or doesn't exist
     if (!this.preprocessedData || isDataDifferent) {
@@ -101,7 +105,7 @@ class MarkovChain {
       }
     });
 
-    this._calculateEdgeWeights(edgeMap);
+    this._setEdgeWeights(edgeMap);
     return;
   }
 
@@ -110,7 +114,40 @@ class MarkovChain {
    * @returns {String}
    */
   generate() {
-    return 'This function will generate a random excuse later'
+    if (this.edgeList.size === 0) {
+      throw new Error('Cannot generate on an empty dataset. Add data to the Markov Chain, or if data is present, call processData() first.');
+    }
+    let current = this._selectRandomStartingWord();
+    let generated = current;
+    while (current !== null) {
+      let nextWordOptions = this.edgeList.get(current).nextWords;
+      current = nextWordOptions[Math.floor(Math.random() * nextWordOptions.length)];
+      // Avoid adding null phrase termination to generated phrase
+      if (current) {
+        generated += current[0] === '\'' ? current : ` ${current}`;
+      }
+    }
+    let doc = nlp(generated);
+    doc.contract();
+    return doc.text().replace('I\'ve', 'I have');
+  }
+
+  /**
+   * @returns {String}
+   */
+  _selectRandomStartingWord() {
+    if (!this.phraseBeginnings.size) {
+      throw new Error('There are no possible starting words. Check that the Markov Chain contains data, and that processData() has been called.');
+    }
+
+    let randIdx = Math.floor(Math.random() * this.phraseBeginnings.size);
+    let iterator = this.phraseBeginnings.values();
+    let startingWord = '';
+    while(randIdx >= 0) {
+      startingWord = iterator.next().value;
+      randIdx--;
+    }
+    return startingWord;
   }
 
   /**
@@ -119,7 +156,7 @@ class MarkovChain {
    * add as weights to this.edgeList.
    * @param {Object{String:Array}} edgeMap
    */
-  _calculateEdgeWeights(edgeMap) {
+  _setEdgeWeights(edgeMap) {
     edgeMap.forEach((valArr, key) => {
       let distribution = {};
       let denominator = 0;
