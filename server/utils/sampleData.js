@@ -41,7 +41,10 @@ exports.sampleCorpus = [
   'I need help',
   'I need to buy more avocados for my toast',
   'I need more bleach, lime, and garbage bags',
-  'I need about $3.50'
+  'I need about $3.50',
+  'Grandma\'s going to prom with me',
+  'My dad\'s friends are coming over to play video games',
+  'My friend John\'s sister is staying the night'
 ];
 
 exports.badSampleCorpus = [
