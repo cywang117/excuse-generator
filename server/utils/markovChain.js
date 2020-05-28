@@ -129,7 +129,12 @@ class MarkovChain {
     }
     let doc = nlp(generated);
     doc.contract();
-    return doc.text().replace('I\'ve', 'I have').replace('cann\'t', 'can\'t');
+    return doc.text()
+      .replace('I\'ve', 'I have')
+      .replace('cann\'t', 'can\'t')
+      .replace('$ ', '$')
+      .replace(' . ', '.')
+      .replace(' - ', '-');
   }
 
   /**
