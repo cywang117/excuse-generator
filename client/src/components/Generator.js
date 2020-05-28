@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Button, Container, Typography, Divider } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -12,30 +12,33 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     flexDirection: 'column',
     height: 'calc(100vh - 64px)'
+  },
+  excuseBox: {
+    paddingBottom: theme.spacing(5),
+    [theme.breakpoints.down('sm')]: {
+      paddingLeft: theme.spacing(1),
+      paddingRight: theme.spacing(1)
+    },
+    [theme.breakpoints.up('md')]: {
+      paddingLeft: theme.spacing(10),
+      paddingRight: theme.spacing(10)
+    }
   }
 }));
 
-let sampleExcuses = [
-  'I\'ve got to water my garbanzo beans',
-  'I have an appointment to get my ringworm checked',
-  'I\'ve got a conference call',
-  'My cat is having an abortion',
-  'I\'m suffering from horrible diarrhea',
-  'I have to return some video tapes',
-  'My mom said no',
-  'My water broke'
-];
-const generateExcuse = () => {
-  return sampleExcuses[Math.floor(Math.random() * sampleExcuses.length)];
-};
-
 const Generator = () => {
   const classes = useStyles();
+  let [excuse, setExcuse] = useState('');
 
-  let [excuse, setExcuse] = useState(generateExcuse());
+  useEffect(() => {
+    getExcuse();
+  }, []);
 
-  const handleClick = () => {
-    setExcuse(generateExcuse());
+  const getExcuse = () => {
+    fetch('/api/excuse')
+      .then(response => response.json())
+      .then(text => setExcuse(text))
+      .catch(console.error);
   };
 
   return (
@@ -46,13 +49,13 @@ const Generator = () => {
         </Typography>
         <Divider />
       </Box>
-      <Box pb={5} px={10} height="175px">
+      <Box className={classes.excuseBox} height="175px">
         <Typography variant="h4" align="center">
           {excuse}
         </Typography>
       </Box>
 
-      <Button variant="contained" color="secondary" onClick={handleClick} className={classes.label}>Generate Another Excuse</Button>
+      <Button variant="contained" color="secondary" onClick={getExcuse} className={classes.label}>Generate Another Excuse</Button>
     </Container>
   );
 };
