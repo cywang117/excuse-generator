@@ -34,4 +34,4 @@ bower_components/
 .floo
 .flooignore
 
-server/utils/words_dictionary.json
+server/data/words_dictionary.json

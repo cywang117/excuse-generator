@@ -1,8 +1,8 @@
 const axios = require('axios');
 const nlp = require('compromise');
 
-const { sampleCorpus, badSampleCorpus } = require('./sampleData');
-const alphaWordDict = require('./words_dictionary.json');
+const { sampleCorpus, badSampleCorpus } = require('../data/sampleData');
+const alphaWordDict = require('../data/words_dictionary.json');
 const { shallowEquals } = require('./shallowEquals');
 
 /**
