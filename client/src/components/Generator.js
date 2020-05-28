@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Link, Container, Typography, Divider } from '@material-ui/core';
+import { Box, Button, Link, Container, Typography, Divider, Tooltip, IconButton } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { GitHub as GitHubIcon } from '@material-ui/icons';
+import { GitHub as GitHubIcon, FavoriteBorder as EmptyHeartIcon } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
   label: {
@@ -27,6 +27,9 @@ const useStyles = makeStyles((theme) => ({
       paddingLeft: theme.spacing(10),
       paddingRight: theme.spacing(10)
     }
+  },
+  likeButton: {
+    marginLeft: theme.spacing(2)
   },
   absoluteBox: {
     position: 'absolute',
@@ -73,7 +76,31 @@ const Generator = () => {
         </Typography>
       </Box>
 
-      <Button variant="contained" color="secondary" onClick={getExcuse} className={classes.label}>Generate Another Excuse</Button>
+      <Box>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={getExcuse}
+          className={classes.label}
+        >
+          Generate Another Excuse
+        </Button>
+        <Tooltip
+          title="Like this excuse!"
+          arrow
+          interactive
+          leaveDelay={200}
+        >
+          <IconButton
+            aria-label="like excuse"
+            className={classes.likeButton}
+            onClick={() => {console.log('clicked')}}
+          >
+            <EmptyHeartIcon color="secondary" fontSize="large" />
+          </IconButton>
+        </Tooltip>
+      </Box>
+
 
       <Box className={classes.absoluteBox}>
         <Link className={classes.ghLink} href="https://github.com/cywang117" color="secondary" target="_blank" rel="noopener">
