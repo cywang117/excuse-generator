@@ -31,10 +31,10 @@ const LikedExcuseList = () => {
       .catch(console.error);
   };
 
-  const handleLike = (_id) => {
+  const handleLike = (_id, excuse) => {
     fetch('/api/like', {
       method: 'POST',
-      body: JSON.stringify({ _id }),
+      body: JSON.stringify({ _id, excuse }),
       headers: {
         'Content-Type': 'application/json'
       }

@@ -18,7 +18,7 @@ const LikedExcuse = ({ _id, excuse, likes, isLast, isLiked, handleLike, handleUn
   const classes = useStyles();
 
   const handleClick = () => {
-    isLiked ? handleUnlike(_id) : handleLike(_id);
+    isLiked ? handleUnlike(_id) : handleLike(_id, excuse);
   }
 
   return (
@@ -30,7 +30,12 @@ const LikedExcuse = ({ _id, excuse, likes, isLast, isLiked, handleLike, handleUn
             <FilledHeartIcon color="secondary" fontSize="small" />
             <Typography variant="subtitle2" color="secondary" className={classes.leftPad}>{likes}</Typography>
           </Box>
-          <Tooltip title="Like this excuse!">
+          <Tooltip
+            title="Like this excuse!"
+            arrow
+            interactive
+            leaveDelay={200}
+          >
             <IconButton aria-label="like excuse" onClick={handleClick}>
               {isLiked ? <FilledHeartIcon color="secondary" /> : <EmptyHeartIcon color="secondary" />}
             </IconButton>
