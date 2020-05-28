@@ -35,3 +35,5 @@ bower_components/
 .flooignore
 
 server/data/words_dictionary.json
+server/data/profanity_list.json
+client/src/data

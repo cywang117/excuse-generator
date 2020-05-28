@@ -3,6 +3,7 @@ const nlp = require('compromise');
 
 const { sampleCorpus, badSampleCorpus } = require('../data/sampleData');
 const alphaWordDict = require('../data/words_dictionary.json');
+const profanityDict = require('../data/profanity_list.json');
 const { shallowEquals } = require('./shallowEquals');
 
 /**
@@ -32,7 +33,6 @@ class MarkovChain {
 
     // For preprocessing
     this.forbiddenPunctuation = new Set([':', ';', '/', '\\', '|', '[', ']', '{', '}', '(', ')', '+', '=', '_', '*', '&', '^', '#', '@', '~', '`', '<', '>']);
-    this.forbiddenWords = null;
     this.allowedPunctCount = {'"': 4, '\'': 4, '%': 1, '?': 1, '-': 2, ',': 2};
 
     // Processed data goes directly into a directed graph
@@ -180,11 +180,6 @@ class MarkovChain {
    * @returns {Array}
    */
   async _preprocessData() {
-    if (!this.forbiddenWords) {
-      let response = await axios.get('https://raw.githubusercontent.com/RobertJGabriel/Google-profanity-words/master/list.txt');
-      this.forbiddenWords = response.data.split('\n').filter(word => word !== '');
-    }
-
     let allowedData = this.unprocessedData
       .filter(excuse => {
         return Boolean(excuse)
@@ -194,7 +189,7 @@ class MarkovChain {
             && this._hasAppropriatePunctuation(excuse);
       })
       .map(excuse => excuse.split(' '))
-      .filter(excuseArr => this.forbiddenWords.every(badWord => !excuseArr.includes(badWord)));
+      .filter(excuseArr => profanityDict.every(badWord => !excuseArr.includes(badWord)));
     allowedData = await this._removeNonWords(allowedData);
     allowedData = this._expandAllContractions(allowedData);
     allowedData = this._addSpacesBetweenPunctuation(allowedData);

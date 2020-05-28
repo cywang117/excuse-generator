@@ -61,3 +61,26 @@ exports.badSampleCorpus = [
   'asdjfoiadhscbasdiufbdasiufs adhsfiuasdbhuif uhiuasdbhfiudasbfu',
   '4 double """" 4 single \'\'\'\' 1 %$ two --, are allowed!'
 ];
+
+exports.listOfExcusesWithLikes = [
+  {
+    excuse: 'Test Excuse 1',
+    likes: 10
+  },
+  {
+    excuse: 'Test Excuse 2',
+    likes: 10
+  },
+  {
+    excuse: 'Test Excuse 3',
+    likes: 3
+  },
+  {
+    excuse: 'Test Excuse 3',
+    likes: 1
+  },
+  {
+    excuse: 'Test Excuse 3',
+    likes: 1
+  }
+];
