@@ -124,12 +124,12 @@ class MarkovChain {
       current = nextWordOptions[Math.floor(Math.random() * nextWordOptions.length)];
       // Avoid adding null phrase termination to generated phrase
       if (current) {
-        generated += current[0] === '\'' ? current : ` ${current}`;
+        generated += current[0] === '\'' || current[0] === ',' ? current : ` ${current}`;
       }
     }
     let doc = nlp(generated);
     doc.contract();
-    return doc.text().replace('I\'ve', 'I have');
+    return doc.text().replace('I\'ve', 'I have').replace('cann\'t', 'can\'t');
   }
 
   /**
