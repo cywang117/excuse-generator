@@ -12,17 +12,27 @@ const cursiveFontObj = {
 }
 
 const theme = createMuiTheme({
-  palette: {
-    primary: {
-      light: '#58a5f0',
-      main: '#0277bd',
-      dark: '#004c8c'
-    }
-  },
   typography: {
     h1: cursiveFontObj,
     h2: cursiveFontObj,
     h3: cursiveFontObj
+  },
+  overrides: {
+    MuiCssBaseline: {
+      '@global': {
+        '*::-webkit-scrollbar': {
+          width: '11px'
+        },
+        '*::-webkit-scrollbar-track': {
+          background: '#CFD8DC'
+        },
+        '*::-webkit-scrollbar-thumb': {
+          backgroundColor: '#9e9195',
+          border: '1px solid #CFD8DC',
+          borderRadius: '5px'
+        }
+      }
+    }
   }
 });
 
