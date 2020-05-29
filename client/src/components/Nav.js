@@ -3,7 +3,7 @@ import { AppBar, ToolBar, Drawer, Hidden, Typography, IconButton } from '@materi
 import { makeStyles } from '@material-ui/core/styles';
 import { Menu as MenuIcon } from '@material-ui/icons';
 import WizardIcon from './WizardIcon';
-import LikedExcuseList from './LikedExcuseList';
+import LikedExcuseListContainer from '../containers/LikedExcuseListContainer';
 
 const useStyles = makeStyles((theme) => ({
   flexToolbar: {
@@ -11,7 +11,8 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'space-between'
   },
   drawer: {
-    background: '#FAFAFA'
+    background: '#FAFAFA',
+    maxWidth: '300px'
   },
   inlineDiv: {
     display: 'flex',
@@ -69,7 +70,7 @@ const Nav = () => {
               paper: classes.drawer
             }}
           >
-            <LikedExcuseList />
+            <LikedExcuseListContainer />
           </Drawer>
         </Hidden>
         <Hidden smDown implementation="css">
@@ -81,7 +82,7 @@ const Nav = () => {
             }}
             open
           >
-            <LikedExcuseList />
+            <LikedExcuseListContainer />
           </Drawer>
         </Hidden>
       </nav>

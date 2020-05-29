@@ -2,7 +2,7 @@ import React from 'react';
 import { CssBaseline } from '@material-ui/core';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import Nav from './Nav';
-import Generator from './Generator';
+import GeneratorContainer from '../containers/GeneratorContainer';
 
 const cursiveFontObj = {
   fontFamily: [
@@ -40,7 +40,7 @@ const App = () => (
   <ThemeProvider theme={theme}>
     <CssBaseline />
     <Nav />
-    <Generator />
+    <GeneratorContainer />
   </ThemeProvider>
 );
 

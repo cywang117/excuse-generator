@@ -18,7 +18,7 @@ const LikedExcuse = ({ _id, excuse, likes, isLast, isLiked, handleLike, handleUn
   const classes = useStyles();
 
   const handleClick = () => {
-    isLiked ? handleUnlike(_id) : handleLike(_id, excuse);
+    isLiked ? handleUnlike(_id, excuse) : handleLike(_id, excuse);
   }
 
   return (

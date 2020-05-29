@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Box, Button, Link, Container, Typography, Divider, Tooltip, IconButton } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { GitHub as GitHubIcon, FavoriteBorder as EmptyHeartIcon } from '@material-ui/icons';
+import { GitHub as GitHubIcon, FavoriteBorder as EmptyHeartIcon, Favorite as FilledHeartIcon } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
   label: {
@@ -47,19 +47,15 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Generator = () => {
+const Generator = ({ excuse, isLiked, id, generateExcuse, updateExcuseStatus }) => {
   const classes = useStyles();
-  let [excuse, setExcuse] = useState('');
 
   useEffect(() => {
-    getExcuse();
+    generateExcuse();
   }, []);
 
-  const getExcuse = () => {
-    fetch('/api/excuse')
-      .then(response => response.json())
-      .then(text => setExcuse(text))
-      .catch(console.error);
+  const handleHeartClick = () => {
+    updateExcuseStatus(excuse, isLiked, id);
   };
 
   return (
@@ -80,7 +76,7 @@ const Generator = () => {
         <Button
           variant="contained"
           color="secondary"
-          onClick={getExcuse}
+          onClick={generateExcuse}
           className={classes.label}
         >
           Generate Another Excuse
@@ -94,9 +90,11 @@ const Generator = () => {
           <IconButton
             aria-label="like excuse"
             className={classes.likeButton}
-            onClick={() => {console.log('clicked')}}
+            onClick={handleHeartClick}
           >
-            <EmptyHeartIcon color="secondary" fontSize="large" />
+            {isLiked ?
+              <FilledHeartIcon color="secondary" fontSize="large" /> :
+              <EmptyHeartIcon color="secondary" fontSize="large" />}
           </IconButton>
         </Tooltip>
       </Box>
