@@ -21,6 +21,11 @@ router.get('/excuse', async (req, res) => {
   try {
     await excuseMarkovChain.processData();
     let randomExcuse = excuseMarkovChain.generate();
+    let idIfExists = await getExcuseId(randomExcuse);
+    while (idIfExists) {
+      randomExcuse = excuseMarkovChain.generate();
+      idIfExists = await getExcuseId(randomExcuse);
+    }
     res.status(200).json(randomExcuse);
   } catch(e) {
     console.error(e);
