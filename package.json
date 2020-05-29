@@ -4,7 +4,7 @@
   "description": "Hack Reactor's MVP sprint - an app idea generator",
   "scripts": {
     "server-dev": "nodemon server/index.js",
-    "client-dev": "concurrently \"webpack --mode development -w -d\" \"live-server client --wait=500 --ignore=node_modules\" --kill-others"
+    "client-dev": "concurrently \"webpack --mode development -w -d\" \"live-server client/dist --watch=client --wait=500 --ignore=node_modules\" --kill-others"
   },
   "repository": {
     "type": "git",
