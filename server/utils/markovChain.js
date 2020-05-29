@@ -1,7 +1,7 @@
 const axios = require('axios');
 const nlp = require('compromise');
 
-const { sampleCorpus, badSampleCorpus } = require('../data/sampleData');
+const dataset = require('../data/excuses.json');
 const alphaWordDict = require('../data/words_dictionary.json');
 const profanityDict = require('../data/profanity_list.json');
 const { shallowEquals } = require('./shallowEquals');
@@ -333,6 +333,6 @@ class MarkovChain {
   }
 }
 
-let excuseMarkovChain = new MarkovChain(sampleCorpus);
+let excuseMarkovChain = new MarkovChain(dataset);
 
 module.exports.excuseMarkovChain = excuseMarkovChain;
