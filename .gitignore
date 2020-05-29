@@ -36,4 +36,5 @@ bower_components/
 
 server/data/words_dictionary.json
 server/data/profanity_list.json
+server/data/excuses.json
 client/src/data
