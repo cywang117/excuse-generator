@@ -37,7 +37,7 @@ class MarkovChain {
 
     // Processed data goes directly into a directed graph
     this.edgeList = new Map();
-    this.phraseBeginnings = new Set();
+    this.phraseBeginnings = new Map();
     this.prevK = null;
     if (!this.unprocessedData) {
       throw new Error('Markov Chain must be instantiated with an array of strings');
@@ -70,7 +70,7 @@ class MarkovChain {
     // All data passed in is invalid after preprocessing. Graph should be emptied
     if (!this.preprocessedData.length) {
       this.edgeList = new Map();
-      this.phraseBeginnings = new Set();
+      this.phraseBeginnings = new Map();
       return;
     }
 
@@ -80,7 +80,7 @@ class MarkovChain {
     if (this.prevK !== k || isDataDifferent) {
       this.prevK = k;
       this.edgeList = new Map();
-      this.phraseBeginnings = new Set();
+      this.phraseBeginnings = new Map();
     }
 
     let edgeMap = new Map();
@@ -91,7 +91,14 @@ class MarkovChain {
         // If first loop, add first k words as a beginning phrase
         if (i === 0) {
           kWindow = strArr.slice(i, k);
-          this.phraseBeginnings.add(kWindow.join(' '));
+          let joined = kWindow.join(' ');
+          let valueIfExists = this.phraseBeginnings.get(joined);
+          if (valueIfExists) {
+            this.phraseBeginnings.set(joined, valueIfExists + 1);
+          } else {
+            this.phraseBeginnings.set(joined, 1);
+          }
+
         } else {
           kWindow.push(strArr[i+k-1]);
           kWindow.shift();
@@ -120,8 +127,17 @@ class MarkovChain {
     let current = this._selectRandomStartingWord();
     let generated = current;
     while (current !== null) {
-      let nextWordOptions = this.edgeList.get(current).nextWords;
-      current = nextWordOptions[Math.floor(Math.random() * nextWordOptions.length)];
+      let nextMapVal = this.edgeList.get(current);
+      let nextWordOptions = nextMapVal ? nextMapVal.nextWords : null;
+      if (!nextWordOptions) {
+        current = null;
+        // TODO: this line is for k >= 2. It can be used once the dataset is suitably large (over 10000 entries approx)
+        // Currently the starting dataset (minus user entry) is around ~350 lines, so k = 2 would only ever return entries in the dataset,
+        // due to lack of distrbution (see distrbutions in this.edgeList after called processData(2))
+      } else {
+        current = nextWordOptions[Math.floor(Math.random() * nextWordOptions.length)];
+      }
+
       // Avoid adding null phrase termination to generated phrase
       if (current) {
         generated += current[0] === '\'' || current[0] === ',' ? current : ` ${current}`;
@@ -145,14 +161,20 @@ class MarkovChain {
       throw new Error('There are no possible starting words. Check that the Markov Chain contains data, and that processData() has been called.');
     }
 
-    let randIdx = Math.floor(Math.random() * this.phraseBeginnings.size);
-    let iterator = this.phraseBeginnings.values();
-    let startingWord = '';
-    while(randIdx >= 0) {
-      startingWord = iterator.next().value;
-      randIdx--;
-    }
-    return startingWord;
+    let startingWordsWithDistributions = Array.from(this.phraseBeginnings.entries());
+    return this._weightedChoice(startingWordsWithDistributions);
+  }
+
+  /**
+   * Takes an array of arrays: [[ value, weight ], [ value2, weight2 ]]
+   * and returns a choice based on the weights in the input
+   * @param {Array[Array[String, Number]]} valsWithWeights
+   * @returns {String}
+   */
+  _weightedChoice(valsWithWeights) {
+    let totalWeight = this.preprocessedData.length;
+    let random = Math.round(Math.random() * totalWeight);
+    return valsWithWeights.find(([val, weight], idx) => (random -= weight) < 0)[0];
   }
 
   /**
@@ -303,7 +325,7 @@ class MarkovChain {
     let punctMatches = word.match(/[\.\?\%\$\,\"\']+/g);
     let current = '';
     for (let letter of word) {
-      if (punctMatches.length && punctMatches[0] === letter) {
+      if (punctMatches && punctMatches.length && punctMatches[0] === letter) {
         current && wordWithSpacedPunctArr.push(current);
         current = '';
         let curLetter = punctMatches.shift();
