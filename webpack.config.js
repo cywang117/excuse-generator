@@ -4,9 +4,9 @@ const path = require('path');
 module.exports = {
   entry: './client/src',
   output: {
-    path: path.resolve(__dirname, '..', 'client', 'dist'),
+    path: path.resolve(__dirname, 'client', 'dist'),
     filename: 'bundle.js',
-    publicPath: path.resolve(__dirname, '..', 'client', 'dist')
+    publicPath: path.resolve(__dirname, 'client', 'dist')
   },
   module: {
     rules: [
