@@ -1,7 +1,10 @@
 import { fetchTopExcuses } from './topExcuses';
 import { fetchSessionLikes } from  './sessionLikes';
+import { setStatus } from './statusMessage';
+import { setGeneratedLiked, setGeneratedId } from './generatedExcuse';
+import store from '../store';
 
-export const likeExcuse = (_id, excuse) => {
+export const likeExcuse = (_id, excuse, isGenerated) => {
   return (dispatch) => {
     return fetch('/api/like', {
       method: 'POST',
@@ -10,11 +13,20 @@ export const likeExcuse = (_id, excuse) => {
         'Content-Type': 'application/json'
       }
     })
-      // .then(res => res.json())
-      // .then(message => console.log(message)) // TODO: do something with message sent by server from liking item
+      .then(res => res.json())
+      .then(message => {
+        dispatch(setStatus(message));
+        if (isGenerated) {
+          dispatch(setGeneratedLiked(true));
+          let lastMessageId = store.getState().message._id;
+          lastMessageId ?
+            dispatch(setGeneratedId(lastMessageId)) :
+            dispatch(setGeneratedId(null));
+        }
+      })
       .then(() => {
-        fetchSessionLikes()(dispatch);
-        fetchTopExcuses()(dispatch);
+        dispatch(fetchSessionLikes());
+        dispatch(fetchTopExcuses());
       });
   }
 };

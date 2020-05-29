@@ -1,20 +1,32 @@
 import { fetchTopExcuses } from './topExcuses';
 import { fetchSessionLikes } from './sessionLikes';
+import { setStatus } from './statusMessage';
+import { setGeneratedLiked, setGeneratedId } from './generatedExcuse';
+import store from '../store';
 
-export const unlikeExcuse = (_id) => {
+export const unlikeExcuse = (_id, excuse, isGenerated) => {
   return (dispatch) => {
     return fetch('/api/unlike', {
       method: 'POST',
-      body: JSON.stringify({ _id }),
+      body: JSON.stringify({ _id, excuse }),
       headers: {
         'Content-Type': 'application/json'
       }
     })
-      // .then(res => res.json())
-      // .then(message => console.log(message)) // TODO: do something with message sent by server from unliking item
+      .then(res => res.json())
+      .then(message => {
+        dispatch(setStatus(message));
+        if (isGenerated) {
+          dispatch(setGeneratedLiked(false));
+          let lastMessageId = store.getState().message._id;
+          lastMessageId ?
+            dispatch(setGeneratedId(lastMessageId)) :
+            dispatch(setGeneratedId(null));
+        }
+      })
       .then(() => {
-        fetchSessionLikes()(dispatch);
-        fetchTopExcuses()(dispatch);
+        dispatch(fetchSessionLikes());
+        dispatch(fetchTopExcuses());
       });
   }
 };

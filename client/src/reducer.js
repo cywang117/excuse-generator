@@ -3,13 +3,22 @@ import { initialState } from './store';
 const reducer = (state = initialState, action) => {
   switch (action.type) {
     case 'SET_GENERATED_EXCUSE':
-      return Object.assign({}, state, { excuse: action.excuse });
+      return { ...state, excuse: action.excuse };
       break;
     case 'SET_SESSION_LIKES':
-      return Object.assign({}, state, { sessionLikes: action.sessionLikes });
+      return { ...state, sessionLikes: action.sessionLikes };
       break;
     case 'SET_TOP_EXCUSES':
-      return Object.assign({}, state, { topExcuses: action.topExcuses });
+      return { ...state, topExcuses: action.topExcuses };
+      break;
+    case 'SET_GENERATED_LIKE_TOGGLED':
+      return { ...state, generatedLiked: action.isLiked };
+      break;
+    case 'SET_GENERATED_ID':
+      return { ...state, generatedId: action._id };
+      break;
+    case 'SET_STATUS_MESSAGE':
+      return { ...state, message: action.message };
       break;
     default:
       return state;
