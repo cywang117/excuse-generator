@@ -1,12 +1,9 @@
 import React, { useEffect } from 'react';
-import { Box, Button, Link, Container, Typography, Divider, Tooltip, IconButton } from '@material-ui/core';
+import { Box, Button, Container, Typography, Divider, Tooltip, IconButton } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { GitHub as GitHubIcon, FavoriteBorder as EmptyHeartIcon, Favorite as FilledHeartIcon } from '@material-ui/icons';
+import { FavoriteBorder as EmptyHeartIcon, Favorite as FilledHeartIcon } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
-  label: {
-    textTransform: 'none'
-  },
   root: {
     display: 'flex',
     justifyContent: 'center',
@@ -14,7 +11,7 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'column',
     height: 'calc(100vh - 64px)',
     [theme.breakpoints.up('md')]: {
-      paddingRight: theme.spacing(30)
+      paddingRight: theme.spacing(35)
     }
   },
   excuseBox: {
@@ -30,20 +27,6 @@ const useStyles = makeStyles((theme) => ({
   },
   likeButton: {
     marginLeft: theme.spacing(2)
-  },
-  absoluteBox: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    padding: theme.spacing(2)
-  },
-  ghLink: {
-    display: 'flex',
-    alignItems: 'center'
-  },
-  ghIcon: {
-    marginLeft: theme.spacing(1),
-    marginRight: theme.spacing(1)
   }
 }));
 
@@ -61,7 +44,11 @@ const Generator = ({ excuse, isLiked, id, generateExcuse, updateExcuseStatus }) 
   return (
     <Container className={classes.root}>
       <Box pb={10}>
-        <Typography variant="h3" align="center" color="secondary" gutterBottom={true}>
+        <Typography
+          variant="h3"
+          color="secondary"
+          gutterBottom={true}
+        >
           Your excuse:
         </Typography>
         <Divider />
@@ -77,7 +64,6 @@ const Generator = ({ excuse, isLiked, id, generateExcuse, updateExcuseStatus }) 
           variant="contained"
           color="secondary"
           onClick={generateExcuse}
-          className={classes.label}
         >
           Generate Another Excuse
         </Button>
@@ -97,13 +83,6 @@ const Generator = ({ excuse, isLiked, id, generateExcuse, updateExcuseStatus }) 
               <EmptyHeartIcon color="secondary" fontSize="large" />}
           </IconButton>
         </Tooltip>
-      </Box>
-
-
-      <Box className={classes.absoluteBox}>
-        <Link className={classes.ghLink} href="https://github.com/cywang117" color="secondary" target="_blank" rel="noopener">
-          More on <GitHubIcon className={classes.ghIcon} />
-        </Link>
       </Box>
     </Container>
   );
