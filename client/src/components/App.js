@@ -4,7 +4,7 @@ import { CssBaseline } from '@material-ui/core';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import Nav from './Nav';
 import GeneratorContainer from '../containers/GeneratorContainer';
-import AddExcuse from './AddExcuse';
+import ExcuseFormContainer from '../containers/ExcuseFormContainer';
 import About from './About';
 import NotFoundPage from './NotFound';
 import GitHubLink from './GitHubLink';
@@ -58,7 +58,7 @@ const App = () => (
           <GeneratorContainer />
         </Route>
         <Route path="/add">
-          <AddExcuse />
+          <ExcuseFormContainer />
         </Route>
         <Route path="/about">
           <About />
