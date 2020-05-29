@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { AppBar, ToolBar, Drawer, Hidden, Typography, IconButton } from '@material-ui/core';
+import { NavLink } from 'react-router-dom';
+import { AppBar, ToolBar, Drawer, Hidden, Typography, IconButton, ListItem } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Menu as MenuIcon } from '@material-ui/icons';
 import WizardIcon from './WizardIcon';
@@ -16,7 +17,6 @@ const useStyles = makeStyles((theme) => ({
   },
   inlineDiv: {
     display: 'flex',
-    paddingRight: theme.spacing(10),
     '& svg': {
       marginRight: theme.spacing(2)
     }
@@ -29,6 +29,9 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.up('md')]: {
       display: 'none'
     }
+  },
+  cursiveFont: {
+    fontFamily: 'Permanent Marker, cursive'
   }
 }));
 
@@ -44,12 +47,44 @@ const Nav = () => {
     <React.Fragment>
       <AppBar position="sticky" color="transparent" elevation={0}>
         <ToolBar className={classes.flexToolbar}>
+
           <div className={classes.inlineDiv}>
-            <WizardIcon fontSize="large" color="secondary" />
-            <Typography variant="h3" color="secondary" className={classes.smallFont} noWrap>
-              Excuse Wizard
-          </Typography>
+
+            <ListItem button component={NavLink} to="/" exact>
+              <WizardIcon fontSize="large" color="primary" />
+              <Typography
+                variant="h3"
+                color="secondary"
+                className={classes.smallFont}
+                noWrap
+              >
+                Excuse Wizard
+              </Typography>
+            </ListItem>
+
+            <ListItem button component={NavLink} to="/add">
+              <Typography
+                noWrap
+                color="primary"
+                className={classes.cursiveFont}
+                variant="h6"
+              >
+                Add Excuse
+              </Typography>
+            </ListItem>
+
+            <ListItem button component={NavLink} to="/about">
+              <Typography
+                noWrap
+                color="primary"
+                className={classes.cursiveFont}
+                variant="h6"
+              >
+                About
+              </Typography>
+            </ListItem>
           </div>
+
           <IconButton
             color="inherit"
             aria-label="open drawer"
