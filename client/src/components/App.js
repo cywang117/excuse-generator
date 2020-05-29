@@ -1,8 +1,13 @@
 import React from 'react';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { CssBaseline } from '@material-ui/core';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import Nav from './Nav';
 import GeneratorContainer from '../containers/GeneratorContainer';
+import AddExcuse from './AddExcuse';
+import About from './About';
+import NotFoundPage from './NotFound';
+import GitHubLink from './GitHubLink';
 
 const cursiveFontObj = {
   fontFamily: [
@@ -16,6 +21,13 @@ const theme = createMuiTheme({
     h1: cursiveFontObj,
     h2: cursiveFontObj,
     h3: cursiveFontObj
+  },
+  palette: {
+    primary: {
+      main: "#373F51",
+      light: "#373F51",
+      dark: "#373F51"
+    }
   },
   overrides: {
     MuiCssBaseline: {
@@ -39,9 +51,24 @@ const theme = createMuiTheme({
 const App = () => (
   <ThemeProvider theme={theme}>
     <CssBaseline />
-    <Nav />
-    <GeneratorContainer />
+    <Router>
+      <Nav />
+      <Switch>
+        <Route exact path="/">
+          <GeneratorContainer />
+        </Route>
+        <Route path="/add">
+          <AddExcuse />
+        </Route>
+        <Route path="/about">
+          <About />
+        </Route>
+        <Route path="*">
+          <NotFoundPage />
+        </Route>
+      </Switch>
+    </Router>
+    <GitHubLink />
   </ThemeProvider>
 );
-
 export default App;
