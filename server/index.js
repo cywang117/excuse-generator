@@ -113,6 +113,11 @@ router.post('/unlike', async (req, res) => {
   }
 });
 
+// Ensure static html asset is served with all React-Router routes
+app.get('*', (req, res) => {
+  res.sendFile('index.html', { root: path.resolve(__dirname, '..', 'client', 'dist')});
+});
+
 const PORT = 3000;
 app.listen(process.env.PORT || PORT, () => {
   console.log(`Server listening on port ${process.env.PORT || PORT}`);
