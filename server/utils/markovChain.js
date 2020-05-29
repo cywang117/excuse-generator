@@ -174,7 +174,9 @@ class MarkovChain {
   _weightedChoice(valsWithWeights) {
     let totalWeight = this.preprocessedData.length;
     let random = Math.round(Math.random() * totalWeight);
-    return valsWithWeights.find(([val, weight], idx) => (random -= weight) < 0)[0];
+    let found = valsWithWeights.find(unit => (random -= unit[1]) <= 0);
+    found = found ? found[0] : 'I'; // TODO: More elegant solution to 'TypeError: Cannot read property '0' of undefined
+    return found;
   }
 
   /**
