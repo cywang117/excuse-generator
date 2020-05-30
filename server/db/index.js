@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+//const dataset = require('../data/excuses.json');
 
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost/excuseWizard', { useNewUrlParser: true, useUnifiedTopology: true })
   .catch(console.error);
@@ -12,7 +13,42 @@ let excuseSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
+// let dataSchema = new mongoose.Schema({
+//   data: [String]
+// });
+
 const Excuse = mongoose.model('Excuse', excuseSchema);
+// const Data = mongoose.model('Data', dataSchema);
+
+// const initializeWithExistingData = async (data) => {
+//   try {
+//     await Data.updateOne({ data }, { $push: { values: { $each: data }}}, { upsert: true });
+//   } catch(e) {
+//     console.error(e);
+//     return false;
+//   }
+//   return true;
+// };
+
+// initializeWithExistingData(dataset);
+
+// exports.getAllData = async () => {
+//   return await Data.find();
+// };
+
+// exports.addToData = async (excuse) => {
+//   try {
+//     const doc = await Data.find();
+//     if (doc.length) {
+//       doc.data.addToSet(excuse);
+//       await doc.save();
+//     }
+//   } catch(e) {
+//     console.error(e);
+//     return false;
+//   }
+//   return true;
+// };
 
 exports.listTopN = async (n = 10) => {
   let results = await Excuse.find().sort({ likes: -1, updatedAt: -1 }).limit(n).exec();

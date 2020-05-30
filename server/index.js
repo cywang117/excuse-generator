@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 const cookieSession = require('cookie-session');
 const express = require('express');
 const app = express();
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use('/api', router);
 app.use(express.static(path.resolve(__dirname, '..', 'client', 'dist')));
 
+// Get a randomly generated excuse
 router.get('/excuse', async (req, res) => {
   try {
     await excuseMarkovChain.processData();
@@ -33,6 +35,18 @@ router.get('/excuse', async (req, res) => {
   }
 });
 
+// Post a user-generated excuse to be added to the Markov Chain data corpus
+router.post('/excuse', async (req, res) => {
+  let isValid = await excuseMarkovChain.checkAddedExcuseValidity(req.body.excuse);
+  if (isValid) {
+    // TODO
+    res.status(201).json({ message: 'Excuse successfully added' });
+  } else {
+    res.status(400).json({ error: 'Invalid excuse' });
+  }
+});
+
+// Get top ten likes, sorted secondarily by updateTime
 router.get('/likes', async (req, res) => {
   try {
     let top10 = await listTopN(10);
@@ -43,6 +57,7 @@ router.get('/likes', async (req, res) => {
   }
 });
 
+// Get likes by _id of current session user
 router.get('/likes/session', (req, res) => {
   if (!req.session.likes) {
     req.session.likes = {};
@@ -50,6 +65,7 @@ router.get('/likes/session', (req, res) => {
   res.status(200).json({ ...req.session.likes });
 });
 
+// Post a new or existing excuse to be liked, then update session
 router.post('/like', async (req, res) => {
   let { excuse } = req.body;
 
@@ -74,6 +90,7 @@ router.post('/like', async (req, res) => {
   }
 });
 
+// Post an existing (NOT new) excuse to be unliked, then update session
 router.post('/unlike', async (req, res) => {
   let { excuse } = req.body;
 
