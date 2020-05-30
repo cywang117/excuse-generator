@@ -5,6 +5,7 @@ const dataset = require('../data/excuses.json');
 const alphaWordDict = require('../data/words_dictionary.json');
 const profanityDict = require('../data/profanity_list.json');
 const { shallowEquals } = require('./shallowEquals');
+const { getAllData } = require('../db/index');
 
 /**
  * Implementation of the Markov Chain Monte Carlo (MCMC) algorithm using directed graph & generate/processData methods.
@@ -34,6 +35,17 @@ class MarkovChain {
     // For preprocessing
     this.forbiddenPunctuation = new Set([':', ';', '/', '\\', '|', '[', ']', '{', '}', '(', ')', '+', '=', '_', '*', '&', '^', '#', '@', '~', '`', '<', '>']);
     this.allowedPunctCount = {'"': 4, '\'': 4, '%': 1, '?': 1, '-': 2, ',': 2};
+    this.escapeCharsMap = {
+      ' ': '%20',
+      '!': '%21',
+      '"': '%22',
+      '$': '%24',
+      '\'': '%27',
+      ',': '%2C',
+      '-': '%2D',
+      '.': '%2E',
+      '?': '%3F'
+    };
 
     // Processed data goes directly into a directed graph
     this.edgeList = new Map();
@@ -43,6 +55,10 @@ class MarkovChain {
       throw new Error('Markov Chain must be instantiated with an array of strings');
       return;
     }
+  }
+
+  addData(string) {
+    this.unprocessedData.push(string);
   }
 
   /**
@@ -154,6 +170,22 @@ class MarkovChain {
   }
 
   /**
+   * For user added excuse strings, check if data:
+   *  - has appropriate punctuation
+   *  - doesn't contain profanity
+   *  - contains only words that exist
+   * @param {String} excuse
+   * @returns {Boolean}
+   */
+  async checkAddedExcuseValidity(excuse) {
+    let allowedData = this._validateData([excuse]);
+    if (allowedData.length) {
+      allowedData = await this._removeNonWords(allowedData);
+    }
+    return allowedData.length > 0 && allowedData[0].length > 0;
+  }
+
+  /**
    * @returns {String}
    */
   _selectRandomStartingWord() {
@@ -205,24 +237,31 @@ class MarkovChain {
   }
 
   /**
-   * Normalize all verbs, articles, remove phrases with non-normal punctuation, remove bad words
    * @returns {Array}
    */
   async _preprocessData() {
-    let allowedData = this.unprocessedData
-      .filter(excuse => {
-        return Boolean(excuse)
-            && typeof excuse === 'string'
-            && excuse.length >= 3
-            && excuse.length <= 75
-            && this._hasAppropriatePunctuation(excuse);
-      })
-      .map(excuse => excuse.split(' '))
-      .filter(excuseArr => profanityDict.every(badWord => !excuseArr.includes(badWord)));
+    let allowedData = this._validateData(this.unprocessedData);
     allowedData = await this._removeNonWords(allowedData);
     allowedData = this._expandAllContractions(allowedData);
     allowedData = this._addSpacesBetweenPunctuation(allowedData);
     return allowedData;
+  }
+
+  /**
+   * Remove phrases with invalid punctuation, length, or bad words
+   * @param {Array} excuses
+   * @returns {Array}
+   */
+  _validateData(excuses) {
+    return excuses.filter(excuse => {
+      return Boolean(excuse)
+          && typeof excuse === 'string'
+          && excuse.length >= 4
+          && excuse.length <= 75
+          && this._hasAppropriatePunctuation(excuse);
+    })
+    .map(excuse => excuse.split(' '))
+    .filter(excuseArr => profanityDict.every(badWord => !excuseArr.includes(badWord)));
   }
 
   /**
@@ -265,19 +304,50 @@ class MarkovChain {
    * @returns {Array[Array[String]]}
    */
   async _removeNonWords(arrOfStrArr) {
-    return arrOfStrArr.filter(async strArr => {
-      return await strArr
-          && strArr.filter(word => word.search(/^[a-zA-Z]+$/) !== -1)
-                   .every(async alphaWord => {
-                     if (alphaWordDict[alphaWord.toLowerCase()]) {
-                       return true;
+    let areWordsPromiseMap = arrOfStrArr.map(strArr => {
+      let isWordPromiseArr = strArr.map(str => {
+        return new Promise((resolve, reject) => {
+          if (alphaWordDict[str.toLowerCase()]) {
+            resolve(true);
+          } else {
+            if (str.search(/^[a-zA-Z0-9]+$/) === -1) {
+              str = this._escapePunctuation(str);
+            }
+            this._ensureIsPopCultureWord(str.toLowerCase())
+              .then(isWord => {
+                resolve(isWord);
+              })
+              .catch(() => resolve(false));
+          }
+        });
+      });
 
-                       // Might be a pop culture word: i.e. TikTok, Instagram, etc.
-                     } else {
-                       return await this._ensureIsPopCultureWord(alphaWord.toLowerCase());
-                     }
-                   })
+      return new Promise((resolve, reject) => {
+        Promise.all(isWordPromiseArr)
+          .then(results => {
+            if (results.includes(false)) {
+              resolve(false);
+            } else {
+              resolve(true);
+            }
+          })
+          .catch(() => resolve(false));
+      })
     });
+
+    let isValidArr = await Promise.all(areWordsPromiseMap);
+    return arrOfStrArr.filter((strArr, idx) => isValidArr[idx] === true);
+  }
+
+  /**
+   * For use with Urban Dictionary API, escapes punctuation
+   */
+  _escapePunctuation() {
+    let strArr = str.split('');
+    strArr = strArr.map(char => {
+      return this.escapeCharsMap[char] ? this.escapeCharsMap[char] : char;
+    });
+    return strArr.join('');
   }
 
   /**
@@ -288,7 +358,13 @@ class MarkovChain {
   async _ensureIsPopCultureWord(word) {
     return await axios.get(`http://api.urbandictionary.com/v0/define?term=${word.toLowerCase()}`)
       .then(res => res.data)
-      .then(({list}) => list.length >= 10 && list[0].word.toLowerCase() === word);
+      .then(({list}) => {
+        return list.length >= 10 && list[0].word.toLowerCase() === word
+      })
+      .catch(err => {
+        console.error('Error checking against Urban Dictionary API: ', err, word);
+        throw err;
+      });
   }
 
   /**
@@ -357,6 +433,16 @@ class MarkovChain {
   }
 }
 
+
 let excuseMarkovChain = new MarkovChain(dataset);
+
+// getAllData()
+//   .then(doc => {
+//     excuseMarkovChain.unprocessedData = doc[0].data;
+//     console.log(doc[0].data);
+//   })
+//   .catch(err => {
+//     console.error(err);
+//   });
 
 module.exports.excuseMarkovChain = excuseMarkovChain;
