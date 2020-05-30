@@ -35,15 +35,29 @@ const useStyles = makeStyles((theme) => ({
 
 const ExcuseForm = ({ addExcuse }) => {
   const classes = useStyles();
-  const [excuse, setExcuse] = useState('');
+  let [excuse, setExcuse] = useState('');
+  let [message, setMessage] = useState('Please be kind!');
 
   const handleChange = (event) => {
     setExcuse(event.target.value);
   };
 
   const handleSubmit = () => {
-    addExcuse(excuse);
-    setExcuse('');
+    if (excuse.length >= 4 && excuse.length <= 75) {
+      let formatted = excuse[0].toUpperCase() + excuse.slice(1);
+      addExcuse(formatted.trim());
+      setExcuse('');
+      setMessage('Excuse successfully added');
+      setTimeout(() => {
+        setMessage('Please be kind!');
+      }, 2000);
+    } else {
+      setExcuse('');
+      setMessage('Excuse must be between 4 and 75 characters');
+      setTimeout(() => {
+        setMessage('Please be kind!');
+      }, 2000);
+    }
   };
 
   return (
@@ -59,7 +73,7 @@ const ExcuseForm = ({ addExcuse }) => {
         </Box>
 
         <Typography>
-          Type a silly or serious PG-13 excuse below to help Excuse Wizard along his enlightenment journey. Read about why
+          Type a silly or serious, PG-13 or under excuse below to help Excuse Wizard along his enlightenment journey. Read about why
           <span>&nbsp;
             <Link
               href="/about"
@@ -71,7 +85,17 @@ const ExcuseForm = ({ addExcuse }) => {
         </Typography>
       </Box>
 
-      <form className={classes.formRoot} autoComplete="off" noValidate>
+      <form
+        className={classes.formRoot}
+        autoComplete="off"
+        noValidate
+        onSubmit={
+          (e) => {
+            e.preventDefault();
+            handleSubmit();
+          }
+        }
+        >
         <TextField
           //error
           id="outlined-error-helper-text"
@@ -80,6 +104,7 @@ const ExcuseForm = ({ addExcuse }) => {
           onChange={handleChange}
           variant="outlined"
           color="secondary"
+          helperText={message}
         />
       </form>
       <Box pt={2}>
