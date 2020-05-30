@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { AppBar, ToolBar, Drawer, Hidden, Typography, IconButton, ListItem } from '@material-ui/core';
+import { AppBar, Toolbar as ToolBar, Drawer, Hidden, Typography, IconButton, ListItem } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Menu as MenuIcon } from '@material-ui/icons';
 import WizardIcon from './WizardIcon';
