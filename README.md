@@ -6,4 +6,4 @@ Technologies used:
 - Modest natural language processing via Compromise
 - Sessions for liked excuses per user via cookies (TTL 1 hour)
 
-LinkedIn: [linkedin.com/in/cywang117](linkedin.com/in/cywang117)
+LinkedIn: [linkedin.com/in/cywang117](http://linkedin.com/in/cywang117)
