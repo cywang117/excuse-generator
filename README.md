@@ -5,3 +5,5 @@ Technologies used:
 - Material UI, React, ReactDOM, Webpack, Babel for front-end. Mobile friendly design with @media queries.
 - Modest natural language processing via Compromise
 - Sessions for liked excuses per user via cookies (TTL 1 hour)
+
+LinkedIn: [linkedin.com/in/cywang117](linkedin.com/in/cywang117)
